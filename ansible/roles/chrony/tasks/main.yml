@@ -1,0 +1,24 @@
+---
+- name: Add the OS specific variables
+  include_vars: '{{ ansible_os_family }}.yml'
+
+- name: Remove NTP if installed in CentOS Redhat or Amazon Linux
+  yum:
+    name: ntp
+    state: absent
+    lock_timeout: 180
+  when: ansible_os_family == 'RedHat'
+
+- name: Install general packages
+  package:
+    name: chrony
+    state: present
+    lock_timeout: "{{ 180 if (ansible_os_family == 'RedHat') else omit }}"
+
+- name: Copy the chrony.conf template file
+  template: src=chrony.conf.j2 dest={{ chrony_config_location }}
+  notify:
+    - restart chrony
+
+- name: Start/stop chrony service
+  service: name={{ chrony_service_name }} state={{ chrony_service_state }} enabled={{ chrony_service_enabled }}

@@ -1,0 +1,20 @@
+---
+
+all:
+  children:
+    vk:
+      children:
+        app:
+          hosts:
+            10.255.10.10:
+        balancer:
+          hosts:
+            10.255.10.10:
+        db:
+          hosts:
+            10.255.10.10:
+
+  vars:
+    private_key_file: ~/.ssh/vk
+    ansible_ssh_user: "centos"
+    ansible_connection: ssh

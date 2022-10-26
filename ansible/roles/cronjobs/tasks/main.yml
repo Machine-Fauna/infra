@@ -1,0 +1,7 @@
+---
+
+- name: Generate CronJobs
+  include: "{{ item.type | default('default') }}.yml"
+  vars:
+    incl_item: "{{ item }}"
+  loop: "{{ cronjobs }}"

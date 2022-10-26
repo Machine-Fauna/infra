@@ -1,0 +1,7 @@
+---
+
+cronjobs:
+  - name: "Clean up Docker"
+    type: special_time
+    time: weekly
+    job: "docker system prune -af --volumes"

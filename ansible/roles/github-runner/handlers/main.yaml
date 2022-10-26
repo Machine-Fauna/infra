@@ -1,0 +1,4 @@
+---
+
+- name: start github-runner
+  command: "/home/github-runner/svc.sh start"

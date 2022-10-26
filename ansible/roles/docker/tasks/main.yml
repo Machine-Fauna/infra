@@ -1,0 +1,14 @@
+---
+
+- include: redhat.yaml
+  when: ansible_os_family == 'RedHat'
+
+- include: debian.yaml
+  when: ansible_os_family == 'Debian'
+
+- name: Deliver config file
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+  notify:
+    - restart docker

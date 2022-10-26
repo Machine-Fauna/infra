@@ -1,0 +1,8 @@
+---
+
+github_runner:
+  version: "2.298.2"
+  sha: 0bfd792196ce0ec6f1c65d2a9ad00215b2926ef2c416b8d97615265194477117
+  url: 'https://github.com/Machine-Fauna'
+  name: 'Vk shell runner'
+  labels: 'app,db,balancer,development,production'

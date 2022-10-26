@@ -1,0 +1,33 @@
+---
+
+- name: Configure prompt for user {{ ansible_ssh_user }}
+  lineinfile:
+    dest: "~{{ ansible_ssh_user }}/.profile"
+    regexp: '^PS1='
+    line: "
+      PS1='${debian_chroot:+($debian_chroot)}\
+      \\[\\033[01m\\]{{ inventory_hostname.split('.')[0] }}.{{ inventory_hostname.split('.')[1] }}\
+      \\[\\033[00m\\]:\
+      \\[\\033[01;34m\\]\\W \
+      \\[\\033[00m\\]\\u\
+      \\$ '
+    "
+  when: not inventory_hostname is match('(\d{1,3}\.){3}\d{1,3}')
+
+- name: Configure prompt for ROOT user
+  lineinfile:
+    dest: "/root/.profile"
+    regexp: '^PS1='
+    line: "
+      PS1='${debian_chroot:+($debian_chroot)}\
+      \\[\\033[01m\\]{{ inventory_hostname.split('.')[0] }}.{{ inventory_hostname.split('.')[1] }}\
+      \\[\\033[00m\\]:\
+      \\[\\033[01;34m\\]\\W \
+      \\[\\033[00m\\]\\u\
+      \\$ '
+    "
+  when: not inventory_hostname is match('(\d{1,3}\.){3}\d{1,3}')
+
+- name: Update apt cache
+  apt: update_cache=yes cache_valid_time=86400
+  changed_when: false

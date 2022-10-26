@@ -1,0 +1,10 @@
+
+- name: Install Github Runner and configure it
+  hosts: app
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  roles:
+    - name: github-runner
+      tags: github-runner

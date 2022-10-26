@@ -1,0 +1,25 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+# Fail2Ban
+- include: fail2ban-RedHat.yml
+  when: ansible_os_family == 'RedHat' and security_fail2ban_enabled
+
+- include: fail2ban-Debian.yml
+  when: ansible_os_family == 'Debian' and security_fail2ban_enabled
+
+- name: Set IPs and subnets to avoid their blocking by fail2ban
+  ini_file:
+    path: '/etc/fail2ban/jail.conf'
+    section: 'DEFAULT'
+    option: 'ignoreip'
+    value: "{{ ' '.join(security_fail2ban_ignoreip) }}"
+    backup: yes
+
+- name: Ensure fail2ban is running and enabled on boot.
+  service: name=fail2ban state=started enabled=yes
+  when: security_fail2ban_enabled
+
+# SSH
+- include: ssh.yml

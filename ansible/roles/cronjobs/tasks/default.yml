@@ -1,0 +1,13 @@
+---
+
+- name: "Create CronJob {{ incl_item.name }}"
+  cron:
+    name: "{{ incl_item.name }}"
+    minute: "{{ incl_item.time.split()[0] }}"
+    hour: "{{ incl_item.time.split()[1] }}"
+    day: "{{ incl_item.time.split()[2] }}"
+    month: "{{ incl_item.time.split()[3] }}"
+    weekday: "{{ incl_item.time.split()[4] }}"
+    job: "{{ incl_item.job }}"
+    user: "{{ incl_item.user | default(omit) }}"
+    state: "{{ incl_item.state | default(omit) }}"

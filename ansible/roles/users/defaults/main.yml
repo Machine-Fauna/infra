@@ -1,0 +1,11 @@
+---
+
+users_sudoers_passwordless: []
+
+users_sudoers_passworded: []
+
+# The default shell for a user if none is specified
+users_default_shell: /bin/bash
+
+# Lists of users to create and delete
+users: []

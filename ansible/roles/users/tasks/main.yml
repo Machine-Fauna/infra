@@ -1,0 +1,80 @@
+---
+
+- name: Creation ansible-managed group
+  group:
+    name: "ansible-managed"
+
+- name: Per-user group creation
+  group:
+    name: "{{ item.username }}"
+  with_items: "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"
+
+- name: User creation
+  user:
+    name: "{{ item.username }}"
+    group: "{{ item.username }}"
+    # empty string removes user from all secondary groups
+    groups:
+    - "{{ item.username }}"
+    - "ansible-managed"
+    append: yes
+    shell: "{{ item.shell | default(users_default_shell) }}"
+    password: "{{ item.password | default('!') }}"
+    comment: "{{ item.comment | default('') }}"
+    uid: "{{ item.uid | default(omit) }}"
+    home: "{{ item.home | default('/home/' + item.username) }}"
+    create_home: "{{ item.create_home | default(omit) }}"
+    generate_ssh_key: "{{ item.generate_ssh_key | default(omit) }}"
+    update_password: "{{ item.update_password | default(omit) }}"
+  with_items: "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"
+
+- name: SSH keys
+  authorized_key:
+    user: "{{ item.0.username }}"
+    key: "{{ item.1 }}"
+    path: "{{ item.0.home | default('/home/' + item.0.username) }}/.ssh/authorized_keys"
+  with_subelements:
+    - "{{ users }}"
+    - ssh_key
+    - skip_missing: yes
+  loop_control:
+    label: "{{ item.0.username }}"
+
+- name: Register defined users list
+  set_fact:
+    users_defined: "{{ users | selectattr('username', 'defined') | map(attribute='username') | list }}"
+  tags: ['delete_users']
+
+- name: Collect users in ansible-managed group
+  shell: |
+    set -o pipefail
+    grep '^ansible-managed:' /etc/group | cut -d: -f4 | tr ',' '\n'
+  args:
+    executable: /bin/bash
+  register: users_list
+  changed_when: False
+  tags: ['delete_users']
+
+- name: Removal non-existing users
+  user:
+    name: "{{ item }}"
+    state: absent
+    remove: yes
+  when: not item in users_defined
+  loop: "{{ users_list.stdout_lines }}"
+  tags: ['delete_users']
+
+- name: Removal non-existing user groups
+  group:
+    name: "{{ item }}"
+    state: absent
+  when: not item in users_defined
+  loop: "{{ users_list.stdout_lines }}"
+  tags: ['delete_users']
+
+- include: sudoers.yml
+  tags: ['sudoers']

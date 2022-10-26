@@ -1,0 +1,9 @@
+---
+
+- name: "Create CronJob {{ incl_item.name }}"
+  cron:
+    name: "{{ incl_item.name }}"
+    special_time: "{{ incl_item.time }}"
+    job: "{{ incl_item.job }}"
+    user: "{{ incl_item.user | default(omit) }}"
+    state: "{{ incl_item.state | default(omit) }}"

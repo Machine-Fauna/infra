@@ -1,0 +1,15 @@
+---
+security_ssh_port: 22
+security_ssh_password_authentication: "no"
+security_ssh_permit_root_login: "no"
+security_ssh_usedns: "no"
+security_ssh_permit_empty_password: "no"
+security_ssh_challenge_response_auth: "no"
+security_ssh_gss_api_authentication: "no"
+security_ssh_x11_forwarding: "no"
+
+security_fail2ban_enabled: true
+security_fail2ban_ignoreip:
+  - 127.0.0.1/8
+  - 10.10.0.0/16 # VPN network
+  - 10.255.0.0/16 # VPN network

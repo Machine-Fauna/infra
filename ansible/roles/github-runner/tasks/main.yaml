@@ -1,0 +1,59 @@
+---
+
+- name: Create group
+  group:
+    name: "github-runner"
+    state: present
+
+- name: Create user
+  user:
+    name: "github-runner"
+    home: /home/github-runner
+    append: yes
+    groups: docker,github-runner
+
+- name: Download archive
+  get_url:
+    url: "https://github.com/actions/runner/releases/download/v{{ github_runner.version }}/actions-runner-linux-x64-{{ github_runner.version }}.tar.gz"
+    dest: "/tmp/github_runner.tar.gz"
+    checksum: "sha256:{{ github_runner.sha }}"
+    timeout: 42
+  register: runner_download
+  tags: installation
+
+- name: Extract installer
+  unarchive:
+    remote_src: true
+    src: "/tmp/github_runner.tar.gz"
+    dest: "/home/github-runner"
+    owner: "github-runner"
+    group: "github-runner"
+    mode: 0755
+  register: runner_download
+  when: runner_download is changed
+
+- name: Install dependencies
+  command:
+    chdir: "/home/github-runner"
+    cmd: ./bin/installdependencies.sh
+
+- name: Configure runner
+  become: true
+  become_user: github-runner
+  command: 
+    chdir: "/home/github-runner"
+    cmd: >
+      /home/github-runner/config.sh 
+      --unattended 
+      --url "{{ github_runner.url }} "
+      --token "{{ GITHUB_RUNNER_TOKEN }}"
+      --labels "{{ github_runner.labels }}"
+      --name "{{ github_runner.name }}"
+  # when: runner_download is changed
+  notify:
+    - start github-runner
+
+- name: Install service
+  command: "/home/github-runner/svc.sh install github-runner"
+  notify:
+    - start github-runner
