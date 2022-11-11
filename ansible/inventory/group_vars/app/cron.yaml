@@ -5,3 +5,7 @@ cronjobs:
     type: special_time
     time: weekly
     job: "docker system prune -af --volumes"
+
+  - name: 'Delete dynamic environment after 2 hours' 
+    time: "0 * * * *"
+    job: !unsafe 'docker ps --format "{{ json . }}" | jq ". | select(.Names|test(\"^mf-(front|back|traefik|db)$\")) | not | select(.Status|test(\"Up [2-9]+ (hour|day|week)\")) .ID" | xargs -r docker kill'
